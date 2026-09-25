@@ -16,7 +16,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential libx11-dev libxext-dev libbsd-dev
+            build-essential libx11-dev libxext-dev
 
       - name: Build miniRT
         run: make
