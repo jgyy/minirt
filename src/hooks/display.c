@@ -18,6 +18,6 @@ void	init_display(t_data *data)
 	mlx_put_image_to_window(data->mlx, data->win, data->img.ptr, 0, 0);
 	mlx_key_hook(data->win, hook_keypress, data);
 	mlx_hook(data->win, DestroyNotify, StructureNotifyMask,
-		(int (*)())hook_close, data);
+		(int (*)())(void (*)(void))hook_close, data);
 	mlx_loop(data->mlx);
 }
