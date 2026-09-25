@@ -39,9 +39,9 @@ make
 ```
 
 The `Makefile` builds `libft`, vendors and builds
-[`minilibx-linux`](minilibx-linux) (needs `libx11-dev`, `libxext-dev` and
-`libbsd-dev` — `sudo apt-get install -y libx11-dev libxext-dev libbsd-dev` on
-Debian/Ubuntu), then links `miniRT`.
+[`minilibx-linux`](minilibx-linux) (needs `libx11-dev` and `libxext-dev` —
+`sudo apt-get install -y libx11-dev libxext-dev` on Debian/Ubuntu), then links
+`miniRT`.
 
 Rules: `all`, `clean`, `fclean`, `re`, `bonus` (the bonus feature is compiled in by
 default, so `bonus` is currently an alias for `all`).
