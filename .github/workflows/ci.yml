@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build:
+    name: Build & headless render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libx11-dev libxext-dev libbsd-dev
+
+      - name: Build miniRT
+        run: make
+        # src/ and libft/ are compiled with -Wall -Wextra -Werror (see Makefile),
+        # so this step already fails on any warning in our own code.
+
+      - name: Render example scenes headlessly
+        run: |
+          mkdir -p renders
+          for scene in scenes/*.rt; do
+            name="$(basename "${scene%.rt}")"
+            ./miniRT "$scene" "renders/${name}.ppm"
+            python3 tools/ppm2png.py "renders/${name}.ppm" "renders/${name}.png"
+          done
+
+      - name: Memory check on headless render path
+        run: |
+          sudo apt-get install -y --no-install-recommends valgrind
+          valgrind --leak-check=full --error-exitcode=1 \
+            ./miniRT scenes/showcase.rt renders/valgrind_showcase.ppm
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: minirt-screenshots
+          path: renders/*.png
+          retention-days: 30
+
+  mermaid:
+    name: Render architecture diagram
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Extract diagram from README.md
+        run: python3 tools/extract_mermaid.py README.md architecture.mmd
+
+      - name: Render diagram with mermaid-cli
+        run: |
+          echo '{"args": ["--no-sandbox"]}' > puppeteer-config.json
+          npx -y @mermaid-js/mermaid-cli \
+            -i architecture.mmd \
+            -o architecture.png \
+            -b white \
+            -p puppeteer-config.json
+
+      - name: Upload diagram
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-diagram
+          path: architecture.png
+          retention-days: 30
